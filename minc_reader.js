@@ -149,15 +149,6 @@ var createVolume = function(header, native_data) {
             }else{
                 return undefined;
             }
-        },
-
-        /*
-            get an estimate of the value that does not contain data.
-            By slicing the first and last n values of the data and avaraging it,
-            where n = width (because data is arranged so, cf. getValue)
-        */
-        getVoidValue: function(){
-
         }
 
       };
@@ -322,7 +313,91 @@ var createVolume = function(header, native_data) {
       return target_image;
     },
 
+    /*
+      return an average value of what is seems to be the NO_DATA value.
+      This value is found by checking at the corners of the minc cube.
+      Sample is the size of each sample taken at every corner,
+      if 5, then 125 voxels will be used at every corner to evaluate the void value,
+      for a total sample of 500 voxels
+    */
+    getNoDataValue: function(sample=5){
+      var sum = 0;
+      var numberOfVoxels = sample * sample * sample * 8;
 
+      // corner 1
+      for(var i=0; i<sample; i++){
+        for(var j=0; j<sample; j++){
+          for(var k=0; k<sample; k++){
+            sum += this.getIntensityValue(i, j, k);
+          }
+        }
+      }
+
+      // corner 2
+      for(var i=header[header.order[0]].space_length - 1 - sample; i<header[header.order[0]].space_length - 1; i++){
+        for(var j=0; j<sample; j++){
+          for(var k=0; k<sample; k++){
+            sum += this.getIntensityValue(i, j, k);
+          }
+        }
+      }
+
+      // corner 3
+      for(var i=header[header.order[0]].space_length - 1 - sample; i<header[header.order[0]].space_length - 1; i++){
+        for(var j=0; j<sample; j++){
+          for(var k=header[header.order[2]].space_length - 1 - sample; k<header[header.order[2]].space_length - 1; k++){
+            sum += this.getIntensityValue(i, j, k);
+          }
+        }
+      }
+
+      // corner 4
+      for(var i=0; i<sample; i++){
+        for(var j=0; j<sample; j++){
+          for(var k=header[header.order[2]].space_length - 1 - sample; k<header[header.order[2]].space_length - 1; k++){
+            sum += this.getIntensityValue(i, j, k);
+          }
+        }
+      }
+
+      // corner 5
+      for(var i=0; i<sample; i++){
+        for(var j=header[header.order[1]].space_length - 1 - sample; j<header[header.order[1]].space_length - 1; j++){
+          for(var k=0; k<sample; k++){
+            sum += this.getIntensityValue(i, j, k);
+          }
+        }
+      }
+
+      // corner 6
+      for(var i=header[header.order[0]].space_length - 1 - sample; i<header[header.order[0]].space_length - 1; i++){
+        for(var j=header[header.order[1]].space_length - 1 - sample; j<header[header.order[1]].space_length - 1; j++){
+          for(var k=0; k<sample; k++){
+            sum += this.getIntensityValue(i, j, k);
+          }
+        }
+      }
+
+      // corner 7
+      for(var i=header[header.order[0]].space_length - 1 - sample; i<header[header.order[0]].space_length - 1; i++){
+        for(var j=header[header.order[1]].space_length - 1 - sample; j<header[header.order[1]].space_length - 1; j++){
+          for(var k=header[header.order[2]].space_length - 1 - sample; k<header[header.order[2]].space_length - 1; k++){
+            sum += this.getIntensityValue(i, j, k);
+          }
+        }
+      }
+
+      // corner 8
+      for(var i=0; i<sample; i++){
+        for(var j=header[header.order[1]].space_length - 1 - sample; j<header[header.order[1]].space_length - 1; j++){
+          for(var k=header[header.order[2]].space_length - 1 - sample; k<header[header.order[2]].space_length - 1; k++){
+            sum += this.getIntensityValue(i, j, k);
+          }
+        }
+      }
+
+      return sum / numberOfVoxels;
+    },
 
     /*
       Return the intensity value from the minc cube.
@@ -500,7 +575,133 @@ var createVolume = function(header, native_data) {
       var yh = height / y_fov;
       var zh = height / z_fov;
       return Math.min(yw, xw, zh, yh);
-    }
+    },
+
+
+    /*
+      each edge has a index, TODO: write about it.
+      return a list of edge data like that:
+      edgeData[n][vector, point]
+      where n is [0, 11] (a cube has 12 edges),
+      vector is a tuple (x, y, z),
+      and point is a point from the edge, also a tuple (x, y, z)
+    */
+    getEdgesEquations: function(){
+      var iLength = header[header.order[0]].space_length;
+      var jLength = header[header.order[1]].space_length;
+      var kLength = header[header.order[2]].space_length;
+
+      var edgeData = [];
+
+      // 0
+      //vector:
+      var edge0Vect = [iLength, 0, 0];
+      var edge0Point = [0, 0, 0];
+
+      // 1
+      // vector:
+      var edge1Vect = [0, jLength, 0];
+      var edge1Point = [0, 0, 0];
+
+      // 2
+      // vector:
+      var edge2Vect = [0, 0, kLength];
+      var edge2Point = [0, 0, 0];
+
+      // 3
+      // vector:
+      var edge3Vect = [0, 0, kLength];
+      var edge3Point = [iLength, 0, 0];
+
+      // 4
+      // vector:
+      var edge4Vect = [iLength, 0, 0];
+      var edge4Point = [0, 0, kLength];
+
+      // 5
+      // vector:
+      var edge5Vect = [iLength, 0, 0];
+      var edge5Point = [0, jLength, 0];
+
+      // 6
+      // vector:
+      var edge6Vect = [0, 0, kLength];
+      var edge6Point = [0, jLength, 0];
+
+      // 7
+      // vector:
+      var edge7Vect = [0, 0, kLength];
+      var edge7Point = [iLength, jLength, 0];
+
+      // 8
+      // vector:
+      var edge8Vect = [iLength, 0, 0];
+      var edge8Point = [0, jLength, kLength];
+
+      // 9
+      // vector:
+      var edge9Vect = [0, jLength, 0];
+      var edge9Point = [0, 0, kLength];
+
+      // 10
+      // vector:
+      var edge10Vect = [0, jLength, 0];
+      var edge10Point = [iLength, 0, 0];
+
+      // 11
+      // vector:
+      var edge11Vect = [0, jLength, 0];
+      var edge11Point = [iLength, 0, kLength];
+
+      edgeData.push( [edge0Vect, edge0Point] );
+      edgeData.push( [edge1Vect, edge1Point] );
+      edgeData.push( [edge2Vect, edge2Point] );
+      edgeData.push( [edge3Vect, edge3Point] );
+      edgeData.push( [edge4Vect, edge4Point] );
+      edgeData.push( [edge5Vect, edge5Point] );
+      edgeData.push( [edge6Vect, edge6Point] );
+      edgeData.push( [edge7Vect, edge7Point] );
+      edgeData.push( [edge8Vect, edge8Point] );
+      edgeData.push( [edge9Vect, edge9Point] );
+      edgeData.push( [edge10Vect, edge10Point] );
+      edgeData.push( [edge11Vect, edge11Point] );
+
+      return edgeData;
+
+    },
+
+    /*
+      return True if the given point is within the data cube.
+      when allowEdges is true, the upper boundaries are pushed
+      by +1 in x, y and z
+    */
+    isWithin: function(point, allowEdges=false){
+      var iLength = header[header.order[0]].space_length;
+      var jLength = header[header.order[1]].space_length;
+      var kLength = header[header.order[2]].space_length;
+
+      if(allowEdges){
+          if(point[0] >= 0 &&
+            point[1] >= 0 &&
+            point[2] >= 0 &&
+            point[0] <= iLength &&
+            point[1] <= jLength &&
+            point[2] <= kLength ){
+            return true
+           }
+      }else{
+          if(point[0] >= 0 &&
+            point[1] >= 0 &&
+            point[2] >= 0 &&
+            point[0] < iLength &&
+            point[1] < jLength &&
+            point[2] < kLength ){
+              return true
+            }
+      }
+
+      return false
+    },
 
   };
 

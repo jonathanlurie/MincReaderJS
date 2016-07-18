@@ -37,7 +37,8 @@
         aSlice = myMinc.slice("xspace", 150);
         //console.log(aSlice);
         //console.log(aSlice.getValue(120, 150));
-
+        console.log(myMinc.isWithin( [12, 56, 78]));
+        console.log(myMinc.isWithin( [12, 56, 780]));
 
         imageData = myMinc.getSliceImageNoColorMap(aSlice);
         loadImageDataIntoCanvas(imageData, "myCanvas");
@@ -59,6 +60,9 @@
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.putImageData(imgData, 0, 0);
     }
+
+
+
 
     function handleFileSelect(evt) {
         var files = evt.target.files; // FileList object
