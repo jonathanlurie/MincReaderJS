@@ -8,6 +8,10 @@
     <script src="hdf5_reader.js"></script>
     <script src="minc_reader.js"></script>
 
+    <script src="VectorTools.js"></script>
+    <script src="Plane.js"></script>
+    <script src="ObliqueSampler.js"></script>
+
 </head>
 <body>
 
@@ -34,13 +38,22 @@
         myMinc = readMincBuffer(buffer);
         console.log("loaded");
 
-        aSlice = myMinc.slice("xspace", 150);
+        //aSlice = myMinc.slice("xspace", 150);
         //console.log(aSlice);
-        //console.log(aSlice.getValue(120, 150));
-        console.log(myMinc.isWithin( [12, 56, 78]));
-        console.log(myMinc.isWithin( [12, 56, 780]));
+        //imageData = myMinc.getSliceImageNoColorMap(aSlice);
 
-        imageData = myMinc.getSliceImageNoColorMap(aSlice);
+        // defining the plane
+        var p = new Plane();
+        p.makeFromOnePointAndNormalVector([150, 150, 150], [1, 1, 1]);
+
+        // defining th oblique sampler
+        var os = new ObliqueSampler(myMinc, p);
+        os.update();
+
+        os.startSampling(false);
+
+        var imageData = os.exportForCanvas();
+
         loadImageDataIntoCanvas(imageData, "myCanvas");
 
         //var dimensions = myMinc.getDimensionInfo();

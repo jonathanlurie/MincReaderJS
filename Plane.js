@@ -1,4 +1,4 @@
-var VectorTools = require("./VectorTools.js");
+//var VectorTools = require("./VectorTools.js");
 
 /*
   simple verification from casio website: http://bit.ly/29LMfQ9
@@ -65,7 +65,7 @@ Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
       var x2 = point[0] + 1;
       var y2 = point[1];
       var z2 = (-1) * ( (this._a * x2 + this._b * y2 + this._d) / this._c );
-      point2 = (x2, y2, z2);
+      point2 = [x2, y2, z2];
     }
 
     // case 2
@@ -73,7 +73,7 @@ Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
       var x2 = point[0] + 1;
       var z2 = point[2];
       var y2 = (-1) * ( (this._a * x2 + this._c * z2 + this._d) / this._b );
-      point2 = (x2, y2, z2);
+      point2 = [x2, y2, z2];
     }
 
     // case 3
@@ -81,7 +81,7 @@ Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
       var y2 = point[1] + 1;
       var z2 = point[2];
       var x2 =  (-1) * ( (this._b * y2 + this._c * z2 + this._d) / this._a );
-      point2 = (x2, y2, z2);
+      point2 = [x2, y2, z2];
     }
 
     this._defineUandVwith2points(point, point2);

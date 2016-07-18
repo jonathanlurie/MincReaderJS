@@ -257,6 +257,15 @@ var createVolume = function(header, native_data) {
       return image;
     },
 
+
+    /*
+      return the datatype used for encoding the voxel.
+      string, example 'uint8'
+    */
+    getDataType: function(){
+      return this.header.datatype;
+    },
+
     /*
       WARNNING: a color_map should be loaded first (as an atribute of volume)
       Create an image from a slice and a color map. The image is canvas compliant.
