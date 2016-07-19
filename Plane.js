@@ -41,6 +41,18 @@ Plane.prototype.makeFromThreePoints = function(P, Q, R){
 }
 
 
+/*
+  initialize the plane directly using the equation
+*/
+Plane.prototype.makeFromEquation = function(a, b, c, d){
+  this._a = a;
+  this._b = b;
+  this._c = c;
+  this._d = d;
+
+  // TODO define u and v
+}
+
 
 /*
   initialize the equation of the plane from 1 point and a vector.
@@ -121,7 +133,7 @@ Plane.prototype._defineUandVwith2points = function(P, Q){
       Q[2] - P[2]
     ]);
 
-  this._v = this._vecTools.crossProduct(this._u, this._n);
+  this._v = this._vecTools.crossProduct(this._u, this._n, true);
 }
 
 

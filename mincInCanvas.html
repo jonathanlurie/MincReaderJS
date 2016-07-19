@@ -44,15 +44,18 @@
 
         // defining the plane
         var p = new Plane();
-        p.makeFromOnePointAndNormalVector([150, 150, 150], [1, 1, 1]);
+        p.makeFromOnePointAndNormalVector([150, 150, 150], [0, 1, 1]);
 
         // defining th oblique sampler
         var os = new ObliqueSampler(myMinc, p);
         os.update();
 
+        var t0 = performance.now();
+        os.setSamplingFactor(1);
         os.startSampling(false);
-
-        var imageData = os.exportForCanvas();
+        var t1 = performance.now();
+        var imageData = os.exportForCanvas(1);
+        console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 
         loadImageDataIntoCanvas(imageData, "myCanvas");
 

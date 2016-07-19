@@ -365,8 +365,6 @@ ObliqueSampler.prototype.exportForCanvas = function( factor){
     return null;
   }
 
-  factor = factor || 255;
-
   var simpleImageContext = document.createElement("canvas").getContext("2d");
   var width = this._obliqueImage.width;
   var height = this._obliqueImage.height;
@@ -396,7 +394,7 @@ ObliqueSampler.prototype.exportForCanvas = function( factor){
 ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
 
   var dataType = this._3Ddata.getDataType();
-  var largestSide = Math.ceil(this._getLargestSide());
+  var largestSide = Math.round(this._getLargestSide());
   var startingSeed = this._getStartingSeed();
 
   var obliqueImageCenter = [ Math.round(largestSide / 2), Math.round(largestSide / 2) ];
@@ -406,7 +404,6 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
   // initialize this._obliqueImage and the mask
   this.initObliqueImage(this._3Ddata.getDataType(), largestSide, largestSide);
 
-
   // mask of boolean to track where the filling algorithm has already been
   //var obliqueImageMask = np.zeros((int(largestSide), int(largestSide)), dtype=dataType  )
 
@@ -415,7 +412,6 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
   pixelStack.push(obliqueImageCenter);
 
   var counter = 0;
-
   console.log("start sampling...");
 
   while(pixelStack.length > 0){
@@ -432,8 +428,7 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
 
       // get the interpolated color of the currentPixel from 3D cube
       //var color = this._3Ddata.getValueTuple(cubeCoord, interpolate);
-      var color = this._3Ddata.getIntensityValue(cubeCoord[0], cubeCoord[1], cubeCoord[2]);
-
+      var color = this._3Ddata.getIntensityValue(Math.round(cubeCoord[0]), Math.round(cubeCoord[1]), Math.round(cubeCoord[2]));
 
       // painting the image
       if(color){
@@ -478,16 +473,19 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
           }
       }
 
-
+      /*
+      if(counter%100 == 0){
+        console.log(counter + " color: " + color);
+        console.log('cubeCoord ' + cubeCoord);
+      }
+      */
+      //counter ++;
 
 
     }
 
 
-    if(counter%100 == 0){
-      console.log(counter);
-    }
-    counter ++;
+
 
 
   }
