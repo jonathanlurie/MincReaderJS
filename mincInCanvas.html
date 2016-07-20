@@ -15,7 +15,9 @@
 </head>
 <body>
 
-    <input type="file" id="myFile">
+    <p>
+      <input type="file" id="myFile">
+    </p>
 
     <canvas id="myCanvas"></canvas>
     <canvas id="myCanvas2"></canvas>
@@ -37,6 +39,11 @@
     function openHdf5(buffer){
         myMinc = readMincBuffer(buffer);
         console.log("loaded");
+
+
+        //var innerBox = myMinc.getDataInnerBox();
+        //console.log(innerBox);
+
 
         //aSlice = myMinc.slice("xspace", 150);
         //console.log(aSlice);
@@ -61,6 +68,7 @@
 
         //var dimensions = myMinc.getDimensionInfo();
         //console.log(dimensions);
+
     }
 
 
@@ -75,6 +83,9 @@
       context.fillStyle = "#00ff00";
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.putImageData(imgData, 0, 0);
+
+
+
     }
 
 

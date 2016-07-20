@@ -158,6 +158,65 @@ var createVolume = function(header, native_data) {
       return slice;
     },
 
+    /*
+      get the index where the data starts and endsm for each dimension.
+      The data starts when it shows a difference from getNoDataValue()
+    */
+    getDataInnerBox: function(){
+      var noDataValue = this.getNoDataValue();
+      //console.log("noDataValue: " + noDataValue);
+
+      var dimensionInfo = this.getDimensionInfo();
+      //console.log(dimensionInfo);
+
+      // in the same order as the dimensions are described in the header (header.order[])
+      var innerBoxData = [];
+
+      //console.log("dimensionInfo.length " + dimensionInfo.length);
+
+      // for each dimension
+      for(var d=0; d<dimensionInfo.length; d++){
+        var currentAvgValue = noDataValue;
+        var start = 0;
+        var end = dimensionInfo[d].space_length - 1;
+
+        // at the begining
+        while(currentAvgValue > (noDataValue*0.95) /*|| start < end*/){
+          var currentSlice = this.slice(dimensionInfo[d].name, start);
+          currentAvgValue = currentSlice.avg;
+          start ++;
+        }
+
+        start --;
+
+        // reset the avg value
+        currentAvgValue = noDataValue;
+
+        // at the end
+        while(currentAvgValue > (noDataValue*0.95) /*|| end > 0*/){
+          var currentSlice = this.slice(dimensionInfo[d].name, end);
+          currentAvgValue = currentSlice.avg;
+          end --;
+        }
+
+        end ++;
+
+        var box1D = {
+          name: dimensionInfo[d].name,
+          start: start,
+          end: end
+        }
+
+        innerBoxData.push(box1D);
+
+
+
+
+      }
+
+      return innerBoxData;
+
+    },
 
     /*
         return the header of the data
@@ -172,13 +231,12 @@ var createVolume = function(header, native_data) {
 
         for(var d=0; d<header.order.length; d++){
             var name = header.order[d];
-            var height = header[name].height;
-            var width =  header[name].width;
 
             var elem = {
                 name: name,
-                height: height,
-                width: width
+                height: header[name].height,
+                width: header[name].width,
+                space_length: header[name].space_length
             }
 
             info.push(elem);
