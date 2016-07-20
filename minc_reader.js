@@ -163,6 +163,10 @@ var createVolume = function(header, native_data) {
       The data starts when it shows a difference from getNoDataValue()
     */
     getDataInnerBox: function(){
+      // the toleranceFactor is a factor [0; 1] under witch data is sopposed to
+      // be relevant. Example: 255 * 0.90 = 229 --> data is relevant when under 229
+      var toleranceFactor = 0.999;
+
       var noDataValue = this.getNoDataValue();
       //console.log("noDataValue: " + noDataValue);
 
@@ -181,7 +185,7 @@ var createVolume = function(header, native_data) {
         var end = dimensionInfo[d].space_length - 1;
 
         // at the begining
-        while(currentAvgValue > (noDataValue*0.95) /*|| start < end*/){
+        while(currentAvgValue > (noDataValue*toleranceFactor) && start < end){
           var currentSlice = this.slice(dimensionInfo[d].name, start);
           currentAvgValue = currentSlice.avg;
           start ++;
@@ -193,7 +197,7 @@ var createVolume = function(header, native_data) {
         currentAvgValue = noDataValue;
 
         // at the end
-        while(currentAvgValue > (noDataValue*0.95) /*|| end > 0*/){
+        while(currentAvgValue > (noDataValue*toleranceFactor) && end > 0){
           var currentSlice = this.slice(dimensionInfo[d].name, end);
           currentAvgValue = currentSlice.avg;
           end --;
