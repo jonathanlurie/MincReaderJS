@@ -71,7 +71,7 @@ ObliqueSampler.prototype.computeCubePlaneHitPoints = function(){
   }
 
   // array are still easier to deal with
-  this._planePolygon = hitPoints;
+  this._planePolygon = hitPoints.length ? hitPoints : null;
 }
 
 
@@ -265,6 +265,7 @@ ObliqueSampler.prototype.initObliqueImage = function(datatype, width, height){
   switch (datatype) {
     case 'int8':
       imageTypedArray = new Int8Array(width * height);
+      imageTypedArray.fill(255);
       break;
     case 'int16':
       imageTypedArray = new Int16Array(width * height);
@@ -359,8 +360,9 @@ ObliqueSampler.prototype.setMaskValue = function(x, y, value){
 ObliqueSampler.prototype.exportForCanvas = function( factor){
 
 
-
-  if(!this._obliqueImage){
+  // the object could be instanciated but the size could be 0
+  // ie. when the plane does not intersect the volume
+  if(!this._obliqueImage || this._obliqueImage.width == 0 || this._obliqueImage.height == 0){
     console.log("ERROR: the oblique image is empty.");
     return null;
   }
@@ -369,6 +371,7 @@ ObliqueSampler.prototype.exportForCanvas = function( factor){
   var width = this._obliqueImage.width;
   var height = this._obliqueImage.height;
 
+  console.log(width + " " + height);
   var image = simpleImageContext.createImageData(width, height);
   var rgbaArray = new Uint8ClampedArray(this._obliqueImage.data.length * 4);
 

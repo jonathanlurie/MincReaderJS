@@ -15,6 +15,7 @@ var Plane = function(){
   this._n = null;   // the normal vector to the plane
   this._u = null;   // one of the vector that belong to the plane
   this._v = null;   // another vector that belong to the plane, orthogonal to _u
+  this._p = null;   // When the plane is defined with a point and a normal vector, this is the point
 
   this._vecTools = new VectorTools();    // some (simple) tool to perform vector calculus
 }
@@ -60,6 +61,7 @@ Plane.prototype.makeFromEquation = function(a, b, c, d){
   point and vector are both tuple (x, y, z)
 */
 Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
+    this._p = point;
     this._n = vector;
     this._a = this._n[0];
     this._b = this._n[1];
@@ -114,6 +116,14 @@ Plane.prototype.getPlaneEquation = function(){
 */
 Plane.prototype.getNormalVector = function(){
   return this._n;
+}
+
+
+/*
+  return tuple with the point from the vector
+*/
+Plane.prototype.getPoint = function(){
+  return this._p;
 }
 
 
