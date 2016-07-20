@@ -15,6 +15,9 @@ var ObliqueSampler = function(volume, plane){
   // created by initObliqueImage
   this._obliqueImage = null;
 
+  // deep copies of this._obliqueImage at certain points
+  this._cachedObliques = [];
+
 }
 
 /*
@@ -206,7 +209,7 @@ ObliqueSampler.prototype._getLargestSide = function(){
         return boxSide * this._samplingFactor;
 
     }else{
-      console.log("ERROR: the polygon is not defined yet, you should call the update() method");
+      console.log("ERROR: the polygon is not defined yet. The plane does not intersect the volume or you should call update()");
       return null;
     }
 }
@@ -359,27 +362,41 @@ ObliqueSampler.prototype.setMaskValue = function(x, y, value){
 */
 ObliqueSampler.prototype.exportForCanvas = function( factor){
 
+  if(!this._obliqueImage)
+    return null;
 
-  // the object could be instanciated but the size could be 0
-  // ie. when the plane does not intersect the volume
-  if(!this._obliqueImage || this._obliqueImage.width == 0 || this._obliqueImage.height == 0){
+  var image = this._exportObliqueForCanvas(
+    this._obliqueImage.data,
+    this._obliqueImage.width,
+    this._obliqueImage.height,
+    factor
+  );
+
+  return image;
+
+}
+
+
+/*
+  Generic function to export a typed array to a html5 canvas compliant dataset.
+  Used for exporting the current oblique as well as cached ones.
+*/
+ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, height, factor){
+  if(!typedArray || width == 0 || height == 0){
     console.log("ERROR: the oblique image is empty.");
     return null;
   }
 
   var simpleImageContext = document.createElement("canvas").getContext("2d");
-  var width = this._obliqueImage.width;
-  var height = this._obliqueImage.height;
 
-  console.log(width + " " + height);
   var image = simpleImageContext.createImageData(width, height);
-  var rgbaArray = new Uint8ClampedArray(this._obliqueImage.data.length * 4);
+  var rgbaArray = new Uint8ClampedArray(typedArray.length * 4);
 
   // from single channel array to RGBA buff, just repeat the value...
-  for(var i=0; i<this._obliqueImage.data.length; i++){
-    rgbaArray[i*4] = this._obliqueImage.data[i] * factor;
-    rgbaArray[i*4 +1] = this._obliqueImage.data[i] * factor;
-    rgbaArray[i*4 +2] = this._obliqueImage.data[i] * factor;
+  for(var i=0; i<typedArray.length; i++){
+    rgbaArray[i*4] = typedArray[i] * factor;
+    rgbaArray[i*4 +1] = typedArray[i] * factor;
+    rgbaArray[i*4 +2] = typedArray[i] * factor;
     rgbaArray[i*4 +3] = 255;
   }
 
@@ -387,6 +404,7 @@ ObliqueSampler.prototype.exportForCanvas = function( factor){
 
   return image;
 }
+
 
 /*
   start the sampling/filling process.
@@ -398,6 +416,15 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
 
   var dataType = this._3Ddata.getDataType();
   var largestSide = Math.round(this._getLargestSide());
+
+  // no need to go further if the largest side is 0...
+  if(largestSide == 0){
+    this._obliqueImage = null;
+    return;
+  }
+
+
+  console.log("largestSide: " + largestSide);
   var startingSeed = this._getStartingSeed();
 
   var obliqueImageCenter = [ Math.round(largestSide / 2), Math.round(largestSide / 2) ];
@@ -492,4 +519,102 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
 
 
   }
+}
+
+
+/*
+  Add the current oblique image (1D array) and plane setting to a cached array.
+  We could request it then to retrieve some data.
+*/
+ObliqueSampler.prototype.cacheOblique = function(name){
+
+
+  // TODO add a warning if sizeis too big
+/*
+
+this._obliqueImage = {
+  data: imageTypedArray,
+  maskData: new Int8Array(width * height),
+  width: width,
+  height: height
+};
+
+*/
+
+/*
+if (typeof something === "undefined") {
+  alert("something is undefined");
+}
+*/
+
+  if(this._obliqueImage && this._obliqueImage.data.length ){
+
+    // if the name is not specified, we use the current date instead
+    name = (typeof name === "undefined")? new Date():name;
+
+    var currentOblique = {
+      data: this._obliqueImage.data.slice(),
+      width: this._obliqueImage.width,
+      height: this._obliqueImage.height,
+      name: name,
+      planePoint: this._plane.getPoint().slice(),
+      planeNormalVector: this._plane.getNormalVector().slice()
+    };
+
+    this._cachedObliques.push(currentOblique);
+
+  }
+
+}
+
+
+/*
+  return the list of all obliques that were cached
+*/
+ObliqueSampler.prototype.listCachedObliques = function(name){
+  var nameList = [];
+
+  for(var i=0; i<this._cachedObliques.length; i++){
+    nameList.push(this._cachedObliques[i].name);
+  }
+
+  return nameList;
+}
+
+
+/*
+  get the full cached-oblique object
+  (what was declared as currentOblique in cacheOblique() )
+  given an index.
+*/
+ObliqueSampler.prototype.getCachedObliqueByIndex = function(index){
+  if(index >= 0 && index<this._cachedObliques.length){
+    return this._cachedObliques[index];
+  }else{
+    console.log("ERROR: the requested of cached oblique index is out of range.");
+  }
+
+  return null;
+}
+
+
+/*
+  Uses the method _exportObliqueForCanvas() to create a html5-canvas compatible
+  dataset containing the cached oblique nmatching the index.
+*/
+ObliqueSampler.prototype.getCachedObliqueCanvasData = function(index, factor){
+  var cachedOblique = this.getCachedObliqueByIndex(index);
+  var obliqueCachedCanvasData = null;
+
+  if(cachedOblique){
+    obliqueCachedCanvasData = this._exportObliqueForCanvas(
+      cachedOblique.data,
+      cachedOblique.width,
+      cachedOblique.height,
+      factor
+    );
+
+  }
+
+  return obliqueCachedCanvasData;
 }
