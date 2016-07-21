@@ -3,14 +3,13 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <script src="pako.js"></script>
-    <script src="hdf5_tools.js"></script>
-    <script src="hdf5_reader.js"></script>
-    <script src="minc_reader.js"></script>
-
-    <script src="VectorTools.js"></script>
-    <script src="Plane.js"></script>
-    <script src="ObliqueSampler.js"></script>
+    <script src="js-lib/pako.js"></script>
+    <script src="js/hdf5_tools.js"></script>
+    <script src="js/hdf5_reader.js"></script>
+    <script src="js/minc_reader.js"></script>
+    <script src="js/VectorTools.js"></script>
+    <script src="js/Plane.js"></script>
+    <script src="js/ObliqueSampler.js"></script>
 
 </head>
 <body>
@@ -40,10 +39,10 @@
         myMinc = readMincBuffer(buffer);
         console.log("loaded");
 
-        var innerBox = myMinc.getDataInnerBox();
-        console.log(innerBox);
+        //var innerBox = myMinc.getDataInnerBox();
+        //console.log(innerBox);
 
-        /*
+
         //aSlice = myMinc.slice("xspace", 150);
         //console.log(aSlice);
         //imageData = myMinc.getSliceImageNoColorMap(aSlice);
@@ -67,7 +66,7 @@
 
         //var dimensions = myMinc.getDimensionInfo();
         //console.log(dimensions);
-        */
+
     }
 
 
