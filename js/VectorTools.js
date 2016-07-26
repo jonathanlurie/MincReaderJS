@@ -31,6 +31,28 @@ VectorTools.prototype.crossProduct = function(v1, v2, normalize){
 
 
 /*
+  compute the dot product between v1 and v2.
+  Note: v1 and v2 must be normalize so that the dot product is also
+  the cosine of the angle between v1 and v2.
+*/
+VectorTools.prototype.dotProduct = function(v1, v2){
+  if(v1.length != v2.length){
+    console.log("ERROR: v1 and v2 must be the same size to compute a dot product");
+    return null;
+  }
+
+  var sum = 0;
+
+  for(var i=0; i<v1.length; i++){
+    sum += (v1[i]*v2[i]);
+  }
+
+  return sum;
+
+}
+
+
+/*
   Return a normalized vector from v (does not replace v).
   args:
     v: Array[3] - vector to normalize

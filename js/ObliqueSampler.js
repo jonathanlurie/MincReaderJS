@@ -7,6 +7,9 @@ var ObliqueSampler = function(volume, plane){
   this._plane = plane;
 
   this._planePolygon = null; // the polygon formed by the intersection of the plane and the cube of data (from 3 to 6 vertice)
+
+  // the equivalent of _planePolygon but within the 2D plane, in image coordinate
+  this._planePolygon2D = null;
   this._samplingFactor = 1.; // impact the size of the finale image
 
   this._vecTools = new VectorTools();
@@ -27,6 +30,12 @@ var ObliqueSampler = function(volume, plane){
 */
 ObliqueSampler.prototype.update = function(){
   this.computeCubePlaneHitPoints();
+
+
+  this.findVertice2DCoord()  ;
+
+
+
 }
 
 
@@ -236,6 +245,83 @@ ObliqueSampler.prototype.obliqueImageCoordToCubeCoord = function(centerImage, st
 
 
 
+ObliqueSampler.prototype.findVertice2DCoord = function(factor){
+  if(!this._planePolygon)
+    return;
+
+  var u = this._plane.getUvector(); // u goes to x direction (arbitrary) : 3D
+  var v = this._plane.getVvector(); // v goes to y direction (arbitrary) : 3D
+  var n = this._plane.getNormalVector();
+  var largestSide = Math.round(this._getLargestSide());
+  var obliqueImageCenter = [ Math.round(largestSide / 2), Math.round(largestSide / 2) ]; // 2D
+  var startingSeed = this._getStartingSeed(); // 3D
+
+
+  // reinit the array
+  this._planePolygon2D = [];
+  this._planePolygon2D.push(obliqueImageCenter);
+
+  console.log("Number of vertice: " + this._planePolygon.length);
+  console.log(u);
+  console.log(v);
+
+  for(var i=0; i<this._planePolygon.length; i++){
+
+    var vertice3D = this._planePolygon[i]; // v
+
+    var dx = vertice3D[0] - startingSeed[0];
+    var dy = vertice3D[1] - startingSeed[1];
+    var dz = vertice3D[2] - startingSeed[2];
+
+    // the following system assumes that (startingSeed + a*u + b*v c*n = vertice3D)
+
+    var commonDenom =
+      u[0]*(n[1]*v[2] - v[1]*n[2]) +
+      v[0]*(u[1]*n[2] - n[1]*u[2]) +
+      n[0]*(v[1]*u[2] - u[1]*v[2]);
+
+    var aNom =
+      dx*(n[1]*v[2] - v[1]*n[2]) +
+      v[0]*(dy*n[2] - n[1]*dz) +
+      n[0]*(v[1]*dz - dy*v[2]);
+
+    var a = aNom / commonDenom;
+
+    var bNom =
+      dx*(n[1]*u[2] - u[1]*n[2]) +
+      u[0]*(dy*n[2] - n[1]*dz) +
+      n[0]*(u[1]*dz - dy*u[2])
+
+    var b = (-1) * bNom / commonDenom;
+
+    var cNom =
+      dx*(v[1]*u[2] - u[1]*v[2]) +
+      u[0]*(dy*v[2] - v[1]*dz) +
+      v[0]*(u[1]*dz - dy*u[2]);
+
+    var c = cNom / commonDenom;
+
+    var point = [
+      obliqueImageCenter[0] + b*this._samplingFactor,
+      obliqueImageCenter[1] + a*this._samplingFactor,
+    ];
+
+    console.log("en 3D....");
+    console.log(vertice3D);
+    console.log("--- a b c...");
+    console.log(a);
+    console.log(b);
+    console.log(c);
+    console.log("---------");
+
+    this._planePolygon2D.push(point);
+
+  }
+}
+
+
+
+
 /*
   returns True if the 3D coord matching to this oblique image point
   is within the cube.
@@ -400,6 +486,34 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
     rgbaArray[i*4 +3] = 255;
   }
 
+  /*
+  // a green reference point at (10,10)
+  var xGreen = 10;
+  var yGreen = 20;
+  var vertex1Dindex = width * yGreen * 4 + xGreen * 4;
+  rgbaArray[vertex1Dindex] = 0;
+  rgbaArray[vertex1Dindex + 1] = 255;
+  rgbaArray[vertex1Dindex + 2] = 0;
+  rgbaArray[vertex1Dindex + 3] = 255;
+  */
+
+  if(this._planePolygon2D){
+    // painting the corners of the polygon
+    for(var i=0; i<this._planePolygon2D.length; i++){
+      var vertex = this._planePolygon2D[i];
+
+      var vertex1Dindex = width * Math.round(vertex[1]) * 4 + Math.round(vertex[0]) * 4;
+      // red
+      rgbaArray[vertex1Dindex] = 255;
+      // green
+      rgbaArray[vertex1Dindex + 1] = 0;
+      // blue
+      rgbaArray[vertex1Dindex + 2] = 0;
+      // alpha
+      rgbaArray[vertex1Dindex + 3] = 255;
+    }
+  }
+
   image.data.set(rgbaArray, 0);
 
   return image;
@@ -424,7 +538,7 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
   }
 
 
-  console.log("largestSide: " + largestSide);
+  //console.log("largestSide: " + largestSide);
   var startingSeed = this._getStartingSeed();
 
   var obliqueImageCenter = [ Math.round(largestSide / 2), Math.round(largestSide / 2) ];
@@ -442,7 +556,7 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
   pixelStack.push(obliqueImageCenter);
 
   var counter = 0;
-  console.log("start sampling...");
+  //console.log("start sampling...");
 
   while(pixelStack.length > 0){
     var currentPixel = pixelStack.pop();
@@ -569,13 +683,14 @@ if (typeof something === "undefined") {
 
 
 /*
-  return the list of all obliques that were cached
+  return the list of all obliques that were cached.
+  This is not an array but an object! (easier to deal with)
 */
 ObliqueSampler.prototype.listCachedObliques = function(name){
-  var nameList = [];
+  var nameList = {};
 
   for(var i=0; i<this._cachedObliques.length; i++){
-    nameList.push(this._cachedObliques[i].name);
+    nameList[this._cachedObliques[i].name] = i;
   }
 
   return nameList;

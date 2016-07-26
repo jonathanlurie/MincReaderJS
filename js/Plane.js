@@ -76,24 +76,27 @@ Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
 
     // case 1
     if(this._c != 0){
-      var x2 = point[0] + 1;
-      var y2 = point[1];
+      console.log("case1");
+      var x2 = point[0];
+      var y2 = point[1] + 1;
       var z2 = (-1) * ( (this._a * x2 + this._b * y2 + this._d) / this._c );
       point2 = [x2, y2, z2];
     }
 
     // case 2
     if(this._b != 0 && !point2){
-      var x2 = point[0] + 1;
-      var z2 = point[2];
+      console.log("case2");
+      var x2 = point[0];
+      var z2 = point[2] + 1;
       var y2 = (-1) * ( (this._a * x2 + this._c * z2 + this._d) / this._b );
       point2 = [x2, y2, z2];
     }
 
     // case 3
     if(this._a != 0 && !point2){
-      var y2 = point[1] + 1;
-      var z2 = point[2];
+      console.log("case3");
+      var y2 = point[1];
+      var z2 = point[2] + 1;
       var x2 =  (-1) * ( (this._b * y2 + this._c * z2 + this._d) / this._a );
       point2 = [x2, y2, z2];
     }
