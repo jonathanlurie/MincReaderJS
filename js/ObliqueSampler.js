@@ -6,6 +6,9 @@ var ObliqueSampler = function(volume, plane){
   this._3Ddata = volume;
   this._plane = plane;
 
+  // we want to compute it only once
+  this._bigDiagonal = null;
+
   this._planePolygon = null; // the polygon formed by the intersection of the plane and the cube of data (from 3 to 6 vertice)
 
   // the equivalent of _planePolygon but within the 2D plane, in image coordinate
@@ -180,8 +183,6 @@ ObliqueSampler.prototype._getStartingSeed = function(){
 }
 
 
-
-
 /*
   return the diagonal (length) of the polygon bounding box.
   affected by the _samplingFactor (ie. doubled if 2)
@@ -190,6 +191,22 @@ ObliqueSampler.prototype._getLargestSide = function(){
 
     if(this._planePolygon){
 
+      if(!this._bigDiagonal){
+
+        var volumeDimensionInfo = this._3Ddata.getDimensionInfo();
+        this._bigDiagonal = Math.sqrt(
+          volumeDimensionInfo[0].space_length * volumeDimensionInfo[0].space_length +
+          volumeDimensionInfo[1].space_length * volumeDimensionInfo[1].space_length +
+          volumeDimensionInfo[2].space_length * volumeDimensionInfo[2].space_length);
+      }
+
+      console.log(this._bigDiagonal * this._samplingFactor * 1.1);
+
+      return this._bigDiagonal * this._samplingFactor * 1.1;
+
+        /*
+        // doing it based on the polygon does not give the best result
+        // and sometimes, the image is not large enough...
         var xMin = this._planePolygon[0][0];
         var yMin = this._planePolygon[0][1];
         var zMin = this._planePolygon[0][2];
@@ -216,6 +233,7 @@ ObliqueSampler.prototype._getLargestSide = function(){
         var boxSide = Math.sqrt((xMax-xMin)*(xMax-xMin) + (yMax-yMin)*(yMax-yMin) + (zMax-zMin)*(zMax-zMin));
 
         return boxSide * this._samplingFactor;
+        */
 
     }else{
       console.log("ERROR: the polygon is not defined yet. The plane does not intersect the volume or you should call update()");
@@ -261,10 +279,6 @@ ObliqueSampler.prototype.findVertice2DCoord = function(factor){
   this._planePolygon2D = [];
   this._planePolygon2D.push(obliqueImageCenter);
 
-  console.log("Number of vertice: " + this._planePolygon.length);
-  console.log(u);
-  console.log(v);
-
   for(var i=0; i<this._planePolygon.length; i++){
 
     var vertice3D = this._planePolygon[i]; // v
@@ -305,14 +319,6 @@ ObliqueSampler.prototype.findVertice2DCoord = function(factor){
       obliqueImageCenter[0] + b*this._samplingFactor,
       obliqueImageCenter[1] + a*this._samplingFactor,
     ];
-
-    console.log("en 3D....");
-    console.log(vertice3D);
-    console.log("--- a b c...");
-    console.log(a);
-    console.log(b);
-    console.log(c);
-    console.log("---------");
 
     this._planePolygon2D.push(point);
 
