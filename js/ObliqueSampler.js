@@ -534,9 +534,6 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
   */
 
   if(this._planePolygon2D){
-
-    console.log('this._planePolygon2D');
-    console.log(this._planePolygon2D);
     // painting the corners of the polygon
     for(var i=0; i<this._planePolygon2D.length; i++){
       var vertex = this._planePolygon2D[i];
