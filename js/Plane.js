@@ -78,7 +78,7 @@ Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
     if(this._c != 0){
       console.log("case1");
       var x2 = point[0];
-      var y2 = point[1] + 1;
+      var y2 = point[1] - 1;
       var z2 = (-1) * ( (this._a * x2 + this._b * y2 + this._d) / this._c );
       point2 = [x2, y2, z2];
     }

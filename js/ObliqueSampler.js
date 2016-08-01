@@ -24,20 +24,20 @@ var ObliqueSampler = function(volume, plane){
   // deep copies of this._obliqueImage at certain points
   this._cachedObliques = [];
 
+  // equation of each edge (no need to compute at every refresh)
+  this._cubeEdges = this._3Ddata.getEdgesEquations();
+
 }
 
 /*
   important in case the plane changes (rotation or translation).
-  for now, it's only about the intersection polygon, but other method
-  may add up later
+  for now, it's only about the intersection polygon, but other methods
+  may be add up later
 */
 ObliqueSampler.prototype.update = function(){
+
   this.computeCubePlaneHitPoints();
-
-
-  this.findVertice2DCoord()  ;
-
-
+  this.findVertice2DCoord();
 
 }
 
@@ -51,11 +51,10 @@ ObliqueSampler.prototype.update = function(){
   - an infinity of hits (the edge belongs to the plane)
 */
 ObliqueSampler.prototype.computeCubePlaneHitPoints = function(){
-  var cubeEdges = this._3Ddata.getEdgesEquations();
   var hitPoints = [];
 
-  for(var i=0; i<cubeEdges.length; i++){
-    var edge = cubeEdges[i];
+  for(var i=0; i<this._cubeEdges.length; i++){
+    var edge = this._cubeEdges[i];
     var tempHitPoint = this._getHitPoint(edge[0], edge[1], this._plane);
 
     // 1- We dont want to add infinite because it mean an orthogonal edge
@@ -184,10 +183,10 @@ ObliqueSampler.prototype._getStartingSeed = function(){
 
 
 /*
-  return the diagonal (length) of the polygon bounding box.
+  return the diagonal (length) of the volume.
   affected by the _samplingFactor (ie. doubled if 2)
 */
-ObliqueSampler.prototype._getLargestSide = function(){
+ObliqueSampler.prototype.getLargestSide = function(){
 
     if(this._planePolygon){
 
@@ -199,8 +198,6 @@ ObliqueSampler.prototype._getLargestSide = function(){
           volumeDimensionInfo[1].space_length * volumeDimensionInfo[1].space_length +
           volumeDimensionInfo[2].space_length * volumeDimensionInfo[2].space_length);
       }
-
-      console.log(this._bigDiagonal * this._samplingFactor * 1.1);
 
       return this._bigDiagonal * this._samplingFactor * 1.1;
 
@@ -270,14 +267,14 @@ ObliqueSampler.prototype.findVertice2DCoord = function(factor){
   var u = this._plane.getUvector(); // u goes to x direction (arbitrary) : 3D
   var v = this._plane.getVvector(); // v goes to y direction (arbitrary) : 3D
   var n = this._plane.getNormalVector();
-  var largestSide = Math.round(this._getLargestSide());
+  var largestSide = Math.round(this.getLargestSide());
   var obliqueImageCenter = [ Math.round(largestSide / 2), Math.round(largestSide / 2) ]; // 2D
   var startingSeed = this._getStartingSeed(); // 3D
 
 
   // reinit the array
   this._planePolygon2D = [];
-  this._planePolygon2D.push(obliqueImageCenter);
+  //this._planePolygon2D.push(obliqueImageCenter);
 
   for(var i=0; i<this._planePolygon.length; i++){
 
@@ -325,6 +322,35 @@ ObliqueSampler.prototype.findVertice2DCoord = function(factor){
   }
 }
 
+
+/*
+  Return an object containing the array of vertice in the 2D image
+  and an array of the the equivalent vertice in the 3D volume.
+  Note: vertice are sorted so that _2D[n] coresponds to _3D[n]
+  Note2: the returned array are copies (slice)
+*/
+ObliqueSampler.prototype.getVerticeMatchList = function(){
+  if(!this._planePolygon)
+    return null;
+
+  /*
+  var verticeMatchList = {
+    _2D: this._planePolygon2D.slice(),
+    _3D: this._planePolygon.slice()
+  }
+  */
+
+  var verticeMatchList = [];
+
+  for(var v=0; v<this._planePolygon.length; v++){
+    verticeMatchList.push({
+      _2D: this._planePolygon2D[v],
+      _3D: this._planePolygon[v]
+    });
+  }
+
+  return verticeMatchList;
+}
 
 
 
@@ -490,6 +516,10 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
     rgbaArray[i*4 +1] = typedArray[i] * factor;
     rgbaArray[i*4 +2] = typedArray[i] * factor;
     rgbaArray[i*4 +3] = 255;
+
+    // make the white part transparent
+    //if(rgbaArray[i*4] > 250 && rgbaArray[i*4+1] > 250 && rgbaArray[i*4+2] > 250)
+    //  rgbaArray[i*4 +3] = 0;
   }
 
   /*
@@ -504,6 +534,9 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
   */
 
   if(this._planePolygon2D){
+
+    console.log('this._planePolygon2D');
+    console.log(this._planePolygon2D);
     // painting the corners of the polygon
     for(var i=0; i<this._planePolygon2D.length; i++){
       var vertex = this._planePolygon2D[i];
@@ -535,7 +568,7 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
 ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
 
   var dataType = this._3Ddata.getDataType();
-  var largestSide = Math.round(this._getLargestSide());
+  var largestSide = Math.round(this.getLargestSide());
 
   // no need to go further if the largest side is 0...
   if(largestSide == 0){
