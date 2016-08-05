@@ -1,5 +1,11 @@
 /*
+  Author: Jonathan Lurie
+  Institution: McGill University, Montreal Neurological Institute - MCIN
+  Date: started on Jully 2016
+  email: lurie.jo2gmail.com
+  License: MIT
 
+  Performs oblique sclicing on a minc2 dataset
 */
 
 var ObliqueSampler = function(volume, plane){

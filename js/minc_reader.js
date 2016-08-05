@@ -160,14 +160,14 @@ var createVolume = function(header, native_data) {
 
     /*
       get the index where the data starts and endsm for each dimension.
-      The data starts when it shows a difference from getNoDataValue()
+      The data starts when it shows a difference from getNoDataValue(n)
     */
     getDataInnerBox: function(){
       // the toleranceFactor is a factor [0; 1] under witch data is sopposed to
       // be relevant. Example: 255 * 0.90 = 229 --> data is relevant when under 229
       var toleranceFactor = 0.999;
 
-      var noDataValue = this.getNoDataValue();
+      var noDataValue = this.getNoDataValue(5);
       //console.log("noDataValue: " + noDataValue);
 
       var dimensionInfo = this.getDimensionInfo();
@@ -298,7 +298,7 @@ var createVolume = function(header, native_data) {
         factor: float - a factor to shrink slice.data into [0; 255] (optional)
               example: if slice.data are uint16, factor can be (1./255.)
     */
-    getSliceImageNoColorMap: function(slice, factor=1.){
+    getSliceImageNoColorMap: function(slice, factor){
       var simpleImageContext = document.createElement("canvas").getContext("2d");
       var width = slice.width;
       var height = slice.height;
@@ -391,7 +391,7 @@ var createVolume = function(header, native_data) {
       if 5, then 125 voxels will be used at every corner to evaluate the void value,
       for a total sample of 500 voxels
     */
-    getNoDataValue: function(sample=5){
+    getNoDataValue: function(sample){
       var sum = 0;
       var numberOfVoxels = sample * sample * sample * 8;
 
@@ -746,7 +746,7 @@ var createVolume = function(header, native_data) {
       when allowEdges is true, the upper boundaries are pushed
       by +1 in x, y and z
     */
-    isWithin: function(point, allowEdges=false){
+    isWithin: function(point, allowEdges){
       var iLength = header[header.order[0]].space_length;
       var jLength = header[header.order[1]].space_length;
       var kLength = header[header.order[2]].space_length;
