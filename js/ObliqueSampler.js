@@ -33,6 +33,9 @@ var ObliqueSampler = function(volume, plane){
   // equation of each edge (no need to compute at every refresh)
   this._cubeEdges = this._3Ddata.getEdgesEquations();
 
+  // will be adapted by findOptimalPreviewFactor()
+  this._optimalPreviewSamplingFactor = 0.5;
+
 }
 
 /*
@@ -377,6 +380,14 @@ ObliqueSampler.prototype.isImageCoordInCube = function(centerImage, startingSeed
 */
 ObliqueSampler.prototype.setSamplingFactor = function(f){
   this._samplingFactor = f;
+}
+
+
+/*
+  uses the precalculated optimal subsampling factor
+*/
+ObliqueSampler.prototype.setSamplingFactorAutoFast = function(){
+  this._samplingFactor = this._optimalPreviewSamplingFactor;
 }
 
 
@@ -774,4 +785,27 @@ ObliqueSampler.prototype.getCachedObliqueCanvasData = function(index, factor){
   }
 
   return obliqueCachedCanvasData;
+}
+
+
+ObliqueSampler.prototype.findOptimalPreviewFactor = function(){
+  var candidate = 128; // for 1/128.
+  var timeLimit = 30; // we dont want to spend more than timeLimit ms to generate a preview
+
+  var timeMs = 0;
+
+  while(timeMs <  timeLimit){
+    candidate /= 2; // so we actually start at 64
+
+    this.setSamplingFactor(1./candidate);
+    this.update();
+    var t0 = performance.now();
+    this.startSampling(false);
+    var t1 = performance.now();
+    timeMs =  (t1 - t0);
+    console.log("at 1/" + candidate + " = " + timeMs + "ms");
+  }
+
+  this._optimalPreviewSamplingFactor = 1./ (candidate*2);
+  console.log(this._optimalPreviewSamplingFactor);
 }
