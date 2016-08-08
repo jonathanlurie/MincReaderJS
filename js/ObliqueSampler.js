@@ -34,7 +34,7 @@ var ObliqueSampler = function(volume, plane){
   this._cubeEdges = this._3Ddata.getEdgesEquations();
 
   // will be adapted by findOptimalPreviewFactor()
-  this._optimalPreviewSamplingFactor = 0.5;
+  this._optimalPreviewSamplingFactor = 0.35;
 
 }
 
@@ -788,24 +788,62 @@ ObliqueSampler.prototype.getCachedObliqueCanvasData = function(index, factor){
 }
 
 
+/*
+  Find the best ratio to subsample the volume so that it is fast to display.
+*/
 ObliqueSampler.prototype.findOptimalPreviewFactor = function(){
-  var candidate = 128; // for 1/128.
-  var timeLimit = 30; // we dont want to spend more than timeLimit ms to generate a preview
-
+  var candidate = 64;
+  var timeLimit = 20; // we dont want to spend more than timeLimit ms to generate a preview
+  var decreasingFactor = 0.5;
   var timeMs = 0;
 
-  while(timeMs <  timeLimit){
-    candidate /= 2; // so we actually start at 64
-
+  console.log("Pass #1");
+  while(1){
     this.setSamplingFactor(1./candidate);
     this.update();
     var t0 = performance.now();
     this.startSampling(false);
     var t1 = performance.now();
     timeMs =  (t1 - t0);
+
+    // if the time limit is reached or the factor is 1/2,
+    // we leave the first estimation round
+    if(timeMs > timeLimit || candidate==2){
+      break;
+    }
     console.log("at 1/" + candidate + " = " + timeMs + "ms");
+
+    // next candidate
+    candidate *= decreasingFactor;
   }
 
-  this._optimalPreviewSamplingFactor = 1./ (candidate*2);
+  // now we know the right candidate is between
+  // the current _candidate_ and _candidate_*2
+  var candidateSecondPass = candidate * 2;
+  decreasingFactor = 0.95;
+
+  console.log("Pass #2");
+  while(1){
+    this.setSamplingFactor(1./candidateSecondPass);
+    this.update();
+    var t0 = performance.now();
+    this.startSampling(false);
+    var t1 = performance.now();
+    timeMs =  (t1 - t0);
+
+    // if the time limit is reached or the factor is 1/2,
+    // we leave the first estimation round
+    if(timeMs >  timeLimit || candidateSecondPass<=candidate){
+      candidateSecondPass /= decreasingFactor;
+      break;
+    }
+    console.log("at 1/" + candidateSecondPass + " = " + timeMs + "ms");
+
+    // next candidate
+    candidateSecondPass *= decreasingFactor;
+  }
+
+  this._optimalPreviewSamplingFactor = 1./ candidateSecondPass;
+  console.log("optimal candidate: " + candidateSecondPass);
   console.log(this._optimalPreviewSamplingFactor);
 }
