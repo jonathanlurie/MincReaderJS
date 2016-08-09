@@ -2,7 +2,7 @@
   Author: Jonathan Lurie
   Institution: McGill University, Montreal Neurological Institute - MCIN
   Date: started on Jully 2016
-  email: lurie.jo2gmail.com
+  email: lurie.jo@gmail.com
   License: MIT
 
   Performs oblique sclicing on a minc2 dataset
@@ -171,12 +171,6 @@ ObliqueSampler.prototype._getStartingSeed = function(){
       zSum += this._planePolygon[v][2];
     }
 
-    // TODO: be sure it is casted to float
-    /*
-    var xCenter = float(xSum) / numOfVertex;
-    var yCenter = float(ySum) / numOfVertex;
-    var zCenter = float(zSum) / numOfVertex;
-    */
     var xCenter = xSum / numOfVertex;
     var yCenter = ySum / numOfVertex;
     var zCenter = zSum / numOfVertex;
@@ -341,13 +335,6 @@ ObliqueSampler.prototype.findVertice2DCoord = function(factor){
 ObliqueSampler.prototype.getVerticeMatchList = function(){
   if(!this._planePolygon)
     return null;
-
-  /*
-  var verticeMatchList = {
-    _2D: this._planePolygon2D.slice(),
-    _3D: this._planePolygon.slice()
-  }
-  */
 
   var verticeMatchList = [];
 
@@ -690,6 +677,7 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
 
 
 /*
+  TODO: remove
   Add the current oblique image (1D array) and plane setting to a cached array.
   We could request it then to retrieve some data.
 */
@@ -716,14 +704,11 @@ if (typeof something === "undefined") {
 
   if(this._obliqueImage && this._obliqueImage.data.length ){
 
-    // if the name is not specified, we use the current date instead
-    name = (typeof name === "undefined")? new Date():name;
-
     var currentOblique = {
       data: this._obliqueImage.data.slice(),
       width: this._obliqueImage.width,
       height: this._obliqueImage.height,
-      name: name,
+      name: null,
       planePoint: this._plane.getPoint().slice(),
       planeNormalVector: this._plane.getNormalVector().slice()
     };
@@ -735,7 +720,10 @@ if (typeof something === "undefined") {
 }
 
 
+
+
 /*
+  TODO: remove
   return the list of all obliques that were cached.
   This is not an array but an object! (easier to deal with)
 */
@@ -751,6 +739,7 @@ ObliqueSampler.prototype.listCachedObliques = function(name){
 
 
 /*
+  TODO: remove
   get the full cached-oblique object
   (what was declared as currentOblique in cacheOblique() )
   given an index.
@@ -767,6 +756,7 @@ ObliqueSampler.prototype.getCachedObliqueByIndex = function(index){
 
 
 /*
+  TODO: remove
   Uses the method _exportObliqueForCanvas() to create a html5-canvas compatible
   dataset containing the cached oblique nmatching the index.
 */
@@ -846,4 +836,34 @@ ObliqueSampler.prototype.findOptimalPreviewFactor = function(){
   this._optimalPreviewSamplingFactor = 1./ candidateSecondPass;
   console.log("optimal candidate: " + candidateSecondPass);
   console.log(this._optimalPreviewSamplingFactor);
+}
+
+
+/*
+  Creates an instance of CachedOblique and returns it.
+  May be used by and external source, to put in a CachedObliqueCollection.
+*/
+ObliqueSampler.prototype.generateCachedOblique = function(){
+
+  // doing a like in this.getVerticeMatchList()
+  // but we prefers to deep copy the vectors for caching...
+  // (you get it, right?)
+  var verticeMatchList = [];
+  for(var v=0; v<this._planePolygon.length; v++){
+    verticeMatchList.push({
+      _2D: this._planePolygon2D[v].slice(),
+      _3D: this._planePolygon[v].slice()
+    });
+  }
+
+  var cachedOblique = new CachedOblique( //plane, data1D, width, height, name
+    this._plane,  // will be deep copyied
+    this._obliqueImage.data, // will be sliced to ensure deep copy
+    this._obliqueImage.width,
+    this._obliqueImage.height,
+    verticeMatchList,
+    null // auto: the current date
+  );
+
+  return cachedOblique;
 }

@@ -1,4 +1,10 @@
-//var VectorTools = require("./VectorTools.js");
+/*
+  Author: Jonathan Lurie
+  Institution: McGill University, Montreal Neurological Institute - MCIN
+  Date: started on Jully 2016
+  email: lurie.jo@gmail.com
+  License: MIT
+*/
 
 /*
   simple verification from casio website: http://bit.ly/29LMfQ9
@@ -76,7 +82,7 @@ Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
 
     // case 1
     if(this._c != 0){
-      console.log("case1");
+      //console.log("case1");
       var x2 = point[0];
       var y2 = point[1] - 1;
       var z2 = (-1) * ( (this._a * x2 + this._b * y2 + this._d) / this._c );
@@ -85,7 +91,7 @@ Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
 
     // case 2
     if(this._b != 0 && !point2){
-      console.log("case2");
+      //console.log("case2");
       var x2 = point[0];
       var z2 = point[2] + 1;
       var y2 = (-1) * ( (this._a * x2 + this._c * z2 + this._d) / this._b );
@@ -94,7 +100,7 @@ Plane.prototype.makeFromOnePointAndNormalVector = function(point, vector){
 
     // case 3
     if(this._a != 0 && !point2){
-      console.log("case3");
+      //console.log("case3");
       var y2 = point[1];
       var z2 = point[2] + 1;
       var x2 =  (-1) * ( (this._b * y2 + this._c * z2 + this._d) / this._a );
@@ -118,7 +124,7 @@ Plane.prototype.getPlaneEquation = function(){
   return tuple with normal the vector
 */
 Plane.prototype.getNormalVector = function(){
-  return this._n;
+  return this._n.slice();
 }
 
 
@@ -126,7 +132,7 @@ Plane.prototype.getNormalVector = function(){
   return tuple with the point from the vector
 */
 Plane.prototype.getPoint = function(){
-  return this._p;
+  return this._p.slice();
 }
 
 
@@ -163,6 +169,25 @@ Plane.prototype.getUvector = function(){
 */
 Plane.prototype.getVvector = function(){
   return this._v;
+}
+
+
+/*
+  copy all the data from otherPlane to _this_ one,
+  except this._vecTools (which does not matter).
+*/
+Plane.prototype.copy = function(otherPlane){
+  // numbers
+  this._a = otherPlane._a;
+  this._b = otherPlane._b;
+  this._c = otherPlane._c;
+  this._d = otherPlane._d;
+
+  // arrays
+  this._n = otherPlane._n.slice();
+  this._u = otherPlane._u.slice();
+  this._v = otherPlane._v.slice();
+  this._p = otherPlane._p.slice();
 }
 
 

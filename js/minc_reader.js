@@ -161,6 +161,7 @@ var createVolume = function(header, native_data) {
     /*
       get the index where the data starts and endsm for each dimension.
       The data starts when it shows a difference from getNoDataValue(n)
+      TODO: works only if NO_DATA is white 
     */
     getDataInnerBox: function(){
       // the toleranceFactor is a factor [0; 1] under witch data is sopposed to
