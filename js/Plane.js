@@ -49,7 +49,8 @@ Plane.prototype.makeFromThreePoints = function(P, Q, R){
 
 
 /*
-  initialize the plane directly using the equation
+  TODO: not really achieved because not very useful (is that event a good reason?)
+  Initialize the plane directly using the equation
 */
 Plane.prototype.makeFromEquation = function(a, b, c, d){
   this._a = a;
@@ -189,6 +190,39 @@ Plane.prototype.copy = function(otherPlane){
   this._v = otherPlane._v.slice();
   this._p = otherPlane._p.slice();
 }
+
+
+
+/*
+  Initialize _this_ plane as an orthogonal plane of the one in args.
+  The normal of _this_ plane is the u unit vector of _plane_.
+  Args:
+    plane: Plane instance - a valid and constructed plane
+*/
+Plane.prototype.buildOrthoU = function(plane){
+  this.makeFromOnePointAndNormalVector(
+    plane.getPoint(),
+    plane.getUvector().slice()
+  );
+}
+
+
+/*
+  Initialize _this_ plane as an orthogonal plane of the one in args.
+  The normal of _this_ plane is the v unit vector of _plane_.
+  Args:
+    plane: Plane instance - a valid and constructed plane
+*/
+Plane.prototype.buildOrthoV = function(plane){
+  this.makeFromOnePointAndNormalVector(
+    plane.getPoint(),
+    plane.getVvector().slice()
+  );
+}
+
+
+
+
 
 
 function testPlane(){

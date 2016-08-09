@@ -390,28 +390,35 @@ ObliqueSampler.prototype.initObliqueImage = function(datatype, width, height){
   switch (datatype) {
     case 'int8':
       imageTypedArray = new Int8Array(width * height);
-      imageTypedArray.fill(255);
+      imageTypedArray.fill(127);
       break;
     case 'int16':
       imageTypedArray = new Int16Array(width * height);
+      imageTypedArray.fill(32767);
       break;
     case 'int32':
       imageTypedArray = new Int32Array(width * height);
+        imageTypedArray.fill(65535);
       break;
     case 'float32':
       imageTypedArray = new Float32Array(width * height);
+      imageTypedArray.fill(1);
       break;
     case 'float64':
       imageTypedArray = new Float64Array(width * height);
+      imageTypedArray.fill(1);
       break;
     case 'uint8':
       imageTypedArray = new Uint8Array(width * height);
+      imageTypedArray.fill(255);
       break;
     case 'uint16':
       imageTypedArray = new Uint16Array(width * height);
+      imageTypedArray.fill(65535);
       break;
     case 'uint32':
       imageTypedArray = new Uint32Array(width * height);
+      imageTypedArray.fill(4294967295);
       break;
     default:
       var error_message = "Unsupported data type: " + header.datatype;
