@@ -249,6 +249,7 @@ ObliqueSampler.prototype.getLargestSide = function(){
   plane with the cube)
 */
 ObliqueSampler.prototype.obliqueImageCoordToCubeCoord = function(centerImage, startingSeed, dx, dy){
+
   var u = this._plane.getUvector(); // u goes to x direction (arbitrary)
   var v = this._plane.getVvector(); // v goes to y direction (arbitrary)
 
@@ -544,6 +545,7 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
   rgbaArray[vertex1Dindex + 3] = 255;
   */
 
+
   if(this._planePolygon2D){
     // painting the corners of the polygon
     for(var i=0; i<this._planePolygon2D.length; i++){
@@ -551,15 +553,16 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
 
       var vertex1Dindex = width * Math.round(vertex[1]) * 4 + Math.round(vertex[0]) * 4;
       // red
-      rgbaArray[vertex1Dindex] = 255;
+      rgbaArray[vertex1Dindex] = 0;
       // green
-      rgbaArray[vertex1Dindex + 1] = 0;
+      rgbaArray[vertex1Dindex + 1] = 170;
       // blue
       rgbaArray[vertex1Dindex + 2] = 0;
       // alpha
       rgbaArray[vertex1Dindex + 3] = 255;
     }
   }
+
 
   image.data.set(rgbaArray, 0);
 
@@ -790,7 +793,7 @@ ObliqueSampler.prototype.getCachedObliqueCanvasData = function(index, factor){
 */
 ObliqueSampler.prototype.findOptimalPreviewFactor = function(){
   var candidate = 64;
-  var timeLimit = 20; // we dont want to spend more than timeLimit ms to generate a preview
+  var timeLimit = 17; // we dont want to spend more than timeLimit ms to generate a preview
   var decreasingFactor = 0.5;
   var timeMs = 0;
 
@@ -843,6 +846,17 @@ ObliqueSampler.prototype.findOptimalPreviewFactor = function(){
   this._optimalPreviewSamplingFactor = 1./ candidateSecondPass;
   console.log("optimal candidate: " + candidateSecondPass);
   console.log(this._optimalPreviewSamplingFactor);
+
+}
+
+
+/*
+  Return the optimal sampling factor as it was computed.
+  This is useful when we want to use multiple instances of ObliqueSampler
+  over the same dataset (minc file)
+*/
+ObliqueSampler.prototype.getOptimalPreviewSamplingFactor = function(){
+  return this._optimalPreviewSamplingFactor;
 }
 
 
