@@ -443,7 +443,7 @@ ObliqueSampler.prototype.getImageValue = function(x, y){
   if(x >= 0 && y>=0 && x<this._obliqueImage.width && y<this._obliqueImage.height){
     return this._obliqueImage.data[x*this._obliqueImage.width + y];
   }else{
-    console.log("ERROR: (" + x + " , " + y + ") is out of the image");
+    console.warn("Point (" + x + " , " + y + ") is out of the image");
     return undefined;
   }
 }
@@ -456,7 +456,7 @@ ObliqueSampler.prototype.setImageValue = function(x, y, value){
   if(x >= 0 && y>=0 && x<this._obliqueImage.width && y<this._obliqueImage.height){
     this._obliqueImage.data[x*this._obliqueImage.width + y] = value;
   }else{
-    console.log("ERROR: (" + x + " , " + y + ") is out of the image");
+    console.warn("Point (" + x + " , " + y + ") is out of the image");
   }
 }
 
@@ -469,7 +469,7 @@ ObliqueSampler.prototype.getMaskValue = function(x, y){
   if(x >= 0 && y>=0 && x<this._obliqueImage.width && y<this._obliqueImage.height){
     return this._obliqueImage.maskData[x*this._obliqueImage.width + y];
   }else{
-    console.log("ERROR: (" + x + " , " + y + ") is out of the image/mask");
+    console.warn("Point (" + x + " , " + y + ") is out of the image/mask");
     return -1;
   }
 }
@@ -482,7 +482,7 @@ ObliqueSampler.prototype.setMaskValue = function(x, y, value){
   if(x >= 0 && y>=0 && x<this._obliqueImage.width && y<this._obliqueImage.height){
     this._obliqueImage.maskData[x*this._obliqueImage.width + y] = value;
   }else{
-    console.log("ERROR: (" + x + " , " + y + ") is out of the image/mask");
+    console.warn("Point (" + x + " , " + y + ") is out of the image/mask");
   }
 }
 
@@ -563,9 +563,7 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
     }
   }
 
-
   image.data.set(rgbaArray, 0);
-
   return image;
 }
 
@@ -677,11 +675,6 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
 
 
     }
-
-
-
-
-
   }
 }
 
