@@ -33,6 +33,15 @@ var ObliqueSampler = function(volume, plane){
   // equation of each edge (no need to compute at every refresh)
   this._cubeEdges = this._3Ddata.getEdgesEquations();
 
+  //console.log(this._3Ddata.getDimensionInfo());
+  //console.log(this._3Ddata.voxelToWorld(0, 0, 0));
+  console.log(this._3Ddata.worldToVoxel(0, 0, 0));
+  //console.log(this._3Ddata.voxelToWorld(147, 177, 183));
+  //console.log(this._3Ddata.voxelToWorld(177, 183, 147));
+  console.log(this._3Ddata.voxelToWorld(183, 147, 177));
+
+  console.log(this._3Ddata.header);
+
   // will be adapted by findOptimalPreviewFactor()
   this._optimalPreviewSamplingFactor = 0.35;
 
@@ -568,6 +577,18 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
 }
 
 
+
+/*
+  Return the correct factor to make the data fit in a 0,255 color range.
+  This is because some minc may be in uint16 or other.
+*/
+ObliqueSampler.prototype.getDepthFactor = function(){
+  return (256/this._3Ddata.header.voxel_max);
+}
+
+
+
+
 /*
   start the sampling/filling process.
   interpolate:
@@ -585,6 +606,8 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
     return;
   }
 
+  // so that uint16 display well
+  var depthFactor = this.getDepthFactor();
 
   //console.log("largestSide: " + largestSide);
   var startingSeed = this._getStartingSeed();
@@ -606,6 +629,8 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
   var counter = 0;
   //console.log("start sampling...");
 
+
+
   while(pixelStack.length > 0){
     var currentPixel = pixelStack.pop();
     var x = currentPixel[0];
@@ -620,7 +645,7 @@ ObliqueSampler.prototype.startSampling = function(filepath, interpolate){
 
       // get the interpolated color of the currentPixel from 3D cube
       //var color = this._3Ddata.getValueTuple(cubeCoord, interpolate);
-      var color = this._3Ddata.getIntensityValue(Math.round(cubeCoord[0]), Math.round(cubeCoord[1]), Math.round(cubeCoord[2]));
+      var color = this._3Ddata.getIntensityValue(Math.round(cubeCoord[0]), Math.round(cubeCoord[1]), Math.round(cubeCoord[2])) * depthFactor;
 
       // painting the image
       if(color){

@@ -171,7 +171,7 @@ function typeIsFloat(typ) {
    */
   function findDataset(link, name, level) {
     var result;
-    if (link.name === name && link.type > 0) {
+    if (link && link.name === name && link.type > 0) {
       result = link;
     } else {
       link.children.find( function( child ) {
