@@ -583,7 +583,8 @@ ObliqueSampler.prototype._exportObliqueForCanvas = function(typedArray, width, h
   This is because some minc may be in uint16 or other.
 */
 ObliqueSampler.prototype.getDepthFactor = function(){
-  return (256/this._3Ddata.header.voxel_max);
+  console.log( this._3Ddata.header );
+  return (255/this._3Ddata.header.voxel_max);
 }
 
 
